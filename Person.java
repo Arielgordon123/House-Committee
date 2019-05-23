@@ -7,7 +7,7 @@ public abstract class Person {
     private String userName;
     private String hashedPassword;
 
-    public Person(String firstName, String lastName, String id, String userName, String hashedPassword) {
+    Person(String firstName, String lastName, String id, String userName, String hashedPassword) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.id = id;
@@ -15,11 +15,11 @@ public abstract class Person {
         this.hashedPassword = hashedPassword;
     }
 
-    public String getFirstName() {
+     private String getFirstName() {
         return firstName;
     }
 
-    public String getLastName() {
+     private String getLastName() {
         return lastName;
     }
 
