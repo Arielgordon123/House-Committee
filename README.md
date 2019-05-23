@@ -1,13 +1,15 @@
 # House-Committee
 
-## implementation of House Committee program using sockets
+ implementation of House Committee program using sockets in Java
 
+
+# Class Diagram 
 ![Class Diagram](ClassDiagram.jpg)
 
 
-### Includes:
+# Includes:
 * My-Sql db - for storing the data
-* users Authentication
+* user Authentication
 
 
 
