@@ -17,6 +17,6 @@ public class Tenant extends Person {
 
     public int getAllPayment() {
 
-        return 0;
+        3
     }
 }
