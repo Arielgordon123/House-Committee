@@ -1,7 +1,7 @@
-package House_Committee.Server;
+package Server;
 
 
-import House_Committee.db.sqlHandler;
+import db.sqlHandler;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -32,7 +32,6 @@ public class Server {
                 synchronized (Server.waitObject)
                 {
                     connected++;
-
                 }
 
                 System.out.println("num of connected clients "+ connected);

@@ -1,4 +1,4 @@
-package House_Committee.Client;
+package Client;
 
 
 import House_Committee.Encoder;
@@ -26,7 +26,7 @@ public class Client {
 
         String modifiedSentence;
         Socket clientSocket = new Socket("localhost", 10000); // server ip and port
-        ObjectOutputStream outToServer = new ObjectOutputStream(clientSocket.getOutputStream()); // pipe for send data to the server
+        DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream()); // pipe for send data to the server
         BufferedReader   inFromServer= new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));// pipe for get data from the server
         try {
 
@@ -51,7 +51,7 @@ public class Client {
                                 userDetails = getRegDetail(userDetails);
                             case "Login":
                                 // convert the array to string and sent it to server
-                                outToServer.writeObject(userDetails);
+                                outToServer.writeBytes(arrToStr(userDetails));
 
                                 break;
 
@@ -64,10 +64,7 @@ public class Client {
                               "Registered  Successfully ",
                               JOptionPane.OK_OPTION);
                       break;
-
-
                 }
-
 
             }
 
@@ -78,6 +75,17 @@ public class Client {
 
         }
     }
+
+    private static String arrToStr(String[] list)
+    {
+        String listString = "";
+        for (String s : list)
+        {
+            listString += s + " ";
+        }
+        return listString+ "\n";
+    }
+
 
     private static String[] getRegDetail(String[] userDetails) {
 
@@ -119,7 +127,7 @@ public class Client {
         String[] res = new String[LOGINOPTSIZE];
         JPanel regPanel = new JPanel();
         regPanel.setLayout(new GridLayout(0,1));
-        JLabel userlabel = new JLabel("user name:");
+        JLabel userLabel = new JLabel("user name:");
         JLabel passLabel1 = new JLabel("Enter a password:");
         JLabel passLabel2 = new JLabel("Retype password:");
 
@@ -127,7 +135,7 @@ public class Client {
         JPasswordField pass1 = new JPasswordField(10);
         JPasswordField pass2 = new JPasswordField(10);
 
-        regPanel.add(userlabel);
+        regPanel.add(userLabel);
         regPanel.add(userName);
         regPanel.add(passLabel1);
         regPanel.add(pass1);

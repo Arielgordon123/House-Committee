@@ -1,10 +1,10 @@
-package House_Committee.Server;
+package Server;
 
 import House_Committee.Person;
-import House_Committee.db.sqlHandler;
+import db.sqlHandler;
+import Server.Server;
 
 import java.io.*;
-import java.net.NoRouteToHostException;
 import java.net.Socket;
 import java.net.SocketException;
 
@@ -20,15 +20,15 @@ public class socketHandler extends Thread {
     }
 
     public void run() {
-        Object fromClient;
+        String fromClient;
         String userName= null,password= null;
         String[] clientArr = null;
-        Person personFromClient= null;
+        String personFromClient= null;
         int num;
         int num2;
         try {
 
-            ObjectInputStream inFromClient = new ObjectInputStream(incoming.getInputStream());
+            BufferedReader inFromClient = new BufferedReader(new InputStreamReader(incoming.getInputStream()));
 
             DataOutputStream outToClient = new DataOutputStream(new DataOutputStream(incoming.getOutputStream()));
             outToClient.writeBytes("connected to server "+incoming.getInetAddress()+"\n");
@@ -36,14 +36,15 @@ public class socketHandler extends Thread {
 
             while(true)
             {
+                // First of all check if the user is logged in and if not Send him login Request
                 if(!isLoggedIn)
                     outToClient.writeBytes("Login\n");
-                fromClient = inFromClient.readObject();
-                personFromClient = (Person)fromClient;
-                if(personFromClient[0] != null)
+                fromClient = inFromClient.readLine();
+
+                if(fromClient != null)
                 {
-                    System.out.println(personFromClient);
-                    clientArr = personFromClient[0].split(" ");
+                    System.out.println(fromClient);
+                    clientArr = fromClient.split(" ");
                     switch (clientArr[0])
                     {
                         case "Login":
@@ -81,8 +82,6 @@ public class socketHandler extends Thread {
 
         catch (IOException e) {
 
-            e.printStackTrace();
-        } catch (ClassNotFoundException e) {
             e.printStackTrace();
         }
 

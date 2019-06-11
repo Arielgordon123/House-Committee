@@ -1,4 +1,4 @@
-package House_Committee.db;
+package db;
 import House_Committee.Person;
 
 import java.sql.*;
@@ -185,7 +185,7 @@ public class sqlHandler {
         connection();
         String host = "jdbc:mysql://us-cdbr-iron-east-02.cleardb.net/heroku_e41c452f428bb7d?reconnect=true";
         String username = "b74f0d4bebea4b";
-        String password = "55e1cf92";
+        String password = "ce29cedbe787040"; //
 
         try {
             connect = DriverManager.getConnection(host, username, password);
