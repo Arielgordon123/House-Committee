@@ -4,7 +4,7 @@ import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 
-class Encoder {
+public class Encoder {
     private static String bytesToHex(byte[] hash) {
         String hex;
         StringBuffer hexString = new StringBuffer();
@@ -16,12 +16,19 @@ class Encoder {
         }
         return hexString.toString();
     }
-    public static String strEncoder(String toEncode, String algo) throws NoSuchAlgorithmException {
+    public static String strEncoder(String toEncode, String algo)  {
+        try {
+        MessageDigest digest = null;
 
-        MessageDigest digest = MessageDigest.getInstance(algo);
+            digest = MessageDigest.getInstance(algo);
+
         byte[] hash = digest.digest(toEncode.getBytes(StandardCharsets.UTF_8));
-        return bytesToHex(hash);
-
-
+            return bytesToHex(hash);
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
+
+
 }
