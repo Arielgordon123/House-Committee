@@ -1,5 +1,6 @@
-package db;
+package House_Committee.db;
 import House_Committee.Person;
+import House_Committee.Tenant;
 
 import java.sql.*;
 import java.util.HashMap;
@@ -79,6 +80,7 @@ public class sqlHandler {
 
 
     public static boolean userLogin(String userName, String hashedPassword) {
+
         try {
             String user = "select userName, hashedPassword from heroku_e41c452f428bb7d.users where userName = ?";
             PreparedStatement statement = connect.prepareStatement(user);
@@ -99,19 +101,21 @@ public class sqlHandler {
         return false;
     }
 
-    public static void insert_Committee(Person person) {
+    public static void insert_user(Person person) {
 
-        String sqlInsert = "insert into "+DBNAME+".users (idhr,hr_name,hr_phone,hr_age,hr_address,hr_mail) values (?,?,?,?,?,?)";
+        String sqlInsert = "insert into "+DBNAME+".users (`userName`,`lastName`,`firstName`,`hashedPassword`,`registrationDate`,`lastLogin`,`buildingNumber`,`apartmentNumber`)" +
+                " values (?,?,?,?,?,?,?,?)";
 
         try {
             PreparedStatement pst = connect.prepareStatement(sqlInsert);
-//            pst.setString(1, s1);
-//            pst.setString(2, s2);
-//            pst.setString(3, s3);
-//            pst.setString(4, s4);
-//            pst.setString(5, s5);
-//            pst.setString(6, s6);
-
+            pst.setString(1, person.getUserName());
+            pst.setString(2, person.getLastName());
+            pst.setString(3, person.getFirstName());
+            pst.setString(4, person.getHashedPassword());
+            pst.setTimestamp(5,  person.getRegistrationDate());
+            pst.setTimestamp(6,  person.getLastLogin());
+            pst.setString(7, person.getBuildingNumber());
+            pst.setString(8, person.getApartmentNumber() );
 
             pst.execute();
 
@@ -123,6 +127,31 @@ public class sqlHandler {
         }
 
     }
+
+    public static void set_monthly_payment(String monthlyPayment) {
+        String query = "insert into "+DBNAME+".tenants (`userId`, `monthlyPayment`)"+
+                " values(LAST_INSERT_ID(), ?)";
+        try {
+            PreparedStatement pst = connect.prepareStatement(query);
+            pst.setString(1,monthlyPayment);
+            pst.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static void set_seniority(String seniority) {
+        String query = "insert into "+DBNAME+".committees (`userId`, `seniority`)"+
+                " values(LAST_INSERT_ID(), ?)";
+        try {
+            PreparedStatement pst = connect.prepareStatement(query);
+            pst.setString(1,seniority);
+            pst.execute();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+
     public static String printResultSet(ResultSet result, PreparedStatement statement) throws SQLException {
         String table ="";
         ResultSetMetaData meta = statement.getMetaData();
@@ -148,18 +177,34 @@ public class sqlHandler {
             }
         return  table;
     }
+//    public static Person getTenantByUserName(String id, String buildingNumber)
+//    {
+//
+//    }
+    public static String select_paymentByTenantId(String id, String buildingNumber)
+    {
+        String query = "select users.buildingNumber, users.apartmentNumber, payments.paymentSum, payments.paymentDate\n" +
+                "from users\n" +
+                "join tenants on tenants.userId = users.userId\n" +
+                "join payments on tenants.idTenants = payments.idTenants\n" +
+                "where payments.idTenants = ? and users.buildingNumber = ?";
+        try {
+            PreparedStatement statement = connect.prepareStatement(query);
+            statement.setString(1, id);
+            statement.setString(2, buildingNumber);
+            return select_query(statement);
 
-    public static String select_query() {
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    private static String select_query(PreparedStatement statement) {
 
         try {
-
-            PreparedStatement statement = connect.prepareStatement("select * from " + DBNAME + ".users");
-
+          //  PreparedStatement statement = connect.prepareStatement("select * from " + DBNAME + ".users");
             ResultSet result = statement.executeQuery();
             return printResultSet(result, statement);
-//
-
-
         } catch (SQLException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -198,6 +243,7 @@ public class sqlHandler {
 
 
     }
+
 
 //    public static void main(String[] argv)
 //    {

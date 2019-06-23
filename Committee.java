@@ -1,15 +1,16 @@
 package House_Committee;
 
 
-import java.sql.PreparedStatement;
-import java.util.Date;
+import java.sql.Date;
+import java.sql.Timestamp;
 
 public class Committee extends Person{
 
-    private int seniority;
+    private String seniority;
 
-    Committee(String firstName, String lastName, String id, String userName, String hashedPassword, int seniority, Date lastLogin, Date registrationDate) {
-        super(firstName, lastName, id, userName, hashedPassword,lastLogin,registrationDate);
+    public Committee(String firstName, String lastName, String userName, String hashedPassword,
+                     String seniority, Timestamp lastLogin, Timestamp registrationDate,String apartmentNumber,String buildingNumber) {
+        super(firstName, lastName, userName, hashedPassword,lastLogin,registrationDate,apartmentNumber,buildingNumber);
         this.seniority = seniority;
 
     }

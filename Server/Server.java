@@ -1,18 +1,16 @@
-package Server;
+package House_Committee.Server;
 
-
-import db.sqlHandler;
-
+import House_Committee.db.sqlHandler;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+
 
 public class Server {
     public static final Object waitObject = Server.class;
     public static int connected = 0;
     public static void main(String argv[]) throws Exception
     {
-
         ServerSocket s = null;
         sqlHandler sql = new sqlHandler();
         int port = 10000;

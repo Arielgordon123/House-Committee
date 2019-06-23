@@ -1,18 +1,31 @@
-package Server;
+package House_Committee.Server;
 
+import House_Committee.Committee;
 import House_Committee.Person;
-import db.sqlHandler;
-import Server.Server;
+import House_Committee.Tenant;
+import House_Committee.db.sqlHandler;
+
+
 
 import java.io.*;
+import java.net.DatagramPacket;
 import java.net.Socket;
 import java.net.SocketException;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+
+import java.util.HashMap;
 
 public class socketHandler extends Thread {
     Socket incoming;
     static sqlHandler sql;
+
     Boolean isLoggedIn = false;
     String[] options = new String[]{"Login"};
+    private final int PAYMET_PER_ROOM = 70;
+
     public socketHandler(Socket _in, sqlHandler _sql) {
         incoming = _in;
         sql = _sql;
@@ -21,11 +34,12 @@ public class socketHandler extends Thread {
 
     public void run() {
         String fromClient;
-        String userName= null,password= null;
+        HashMap<String, String> details = new HashMap<>();
         String[] clientArr = null;
-        String personFromClient= null;
-        int num;
-        int num2;
+
+        Committee committee;
+        Tenant tenant;
+
         try {
 
             BufferedReader inFromClient = new BufferedReader(new InputStreamReader(incoming.getInputStream()));
@@ -45,19 +59,59 @@ public class socketHandler extends Thread {
                 {
                     System.out.println(fromClient);
                     clientArr = fromClient.split(" ");
-                    switch (clientArr[0])
+                    for(String s : clientArr)
+                    {
+                        String key, value;
+                        String[] f = s.split(":");
+                        key = f[0];
+                        value = f[1];
+                        details.put(key,value);
+                    }
+                    switch (details.get("Operation"))
                     {
                         case "Login":
                             System.out.println("Login");
-                            isLoggedIn = sqlHandler.userLogin(clientArr[1],clientArr[2]);
+                            isLoggedIn = sqlHandler.userLogin(details.get("userName"),details.get("Password"));
                             outToClient.writeBytes(isLoggedIn+"\n");
-                            System.out.println("is logged in "+ isLoggedIn);
                             break;
                         case "Register":
                             System.out.println("register");
 
+                            sqlHandler.insert_user(new Person(
+                                    details.get("firstName"),
+                                    details.get("lastName"),
+                                    details.get("userName"),
+                                    details.get("Password"),
+                                    new Timestamp(System.currentTimeMillis()),
+                                    new Timestamp(System.currentTimeMillis()),
+                                    details.get("apartmentNumber"),
+                                    details.get("buildingNumber")));
+                            if(details.get("type").equals("Committee"))
+                            {
+                                // add seniority to db
+                                sqlHandler.set_seniority(details.get("seniority"));
+                                committee = new Committee(details.get("firstName"),details.get("lastName"), details.get("userName"),
+                                        details.get("Password"),details.get("seniority"), new Timestamp(System.currentTimeMillis()),
+                                        new Timestamp(System.currentTimeMillis()),details.get("apartmentNumber"),
+                                        details.get("buildingNumber"));
+                            }
+                            else if(details.get("type").equals("Tenant"))
+                            {
+                                // add monthly payment to db
+                                sqlHandler.set_monthly_payment(Integer.parseInt(details.get("monthlyPayment")) * PAYMET_PER_ROOM+ "");
+                                tenant = new Tenant(details.get("firstName"),details.get("lastName"), details.get("userName"),
+                                        details.get("Password"), new Timestamp(System.currentTimeMillis()),
+                                        new Timestamp(System.currentTimeMillis()),details.get("apartmentNumber"),
+                                        details.get("buildingNumber"));
+                                tenant.setMonthlyPayment(Integer.parseInt(details.get("monthlyPayment")) * PAYMET_PER_ROOM);
+                            }
+
                             outToClient.writeBytes("Registered\n");
+
                             break;
+                        case "Menu":
+                            outToClient.writeBytes("welcome to the House Committee Program!");
+
                     }
                    // outToClient.writeBytes(sqlHandler.select_user(personFromClient)+"\n");
                    // outToClient.writeBytes(sqlHandler.select_query()+"\n");

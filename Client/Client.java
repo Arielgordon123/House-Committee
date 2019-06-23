@@ -1,4 +1,4 @@
-package Client;
+package House_Committee.Client;
 
 
 import House_Committee.Encoder;
@@ -11,6 +11,7 @@ import java.io.InputStreamReader;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
+import java.util.HashMap;
 import java.util.Scanner;
 
 import static House_Committee.Encoder.strEncoder;
@@ -33,31 +34,42 @@ public class Client {
             while (true) {
 
                 modifiedSentence = inFromServer.readLine(); // getting from server
-                System.out.println(modifiedSentence);
+
               switch (modifiedSentence) {
                    // System.out.println(modifiedSentence.replaceAll("\\#\\$","\n"));// printing in the console
                     case "Login":
-                        String[] userDetails = loginOrRegister();
-                        while(userDetails == null)
+                        HashMap<String ,String> userDetails = loginOrRegister();
+                        while(userDetails == null) // while user not connected
                             userDetails = loginOrRegister();
-                        switch (userDetails[0])
+                        switch (userDetails.get("Operation"))
                         {
-                            case "Exit": // if the user close the form from the X or Cancel Button
+                            case "Exit":
+                                // if the user close the form from the X or Cancel Button
                                 inFromServer.close(); // close all the connection
                                 outToServer.close();
                                 System.exit(1); // Exit from the process
                                 break;
                             case "Register": // get more info from the user by the command line
                                 userDetails = getRegDetail(userDetails);
-                            case "Login":
-                                // convert the array to string and sent it to server
-                                outToServer.writeBytes(arrToStr(userDetails));
+                                // there is no break because we need to send userDetails to the server in both cases
 
+                            case "Login":
+                                // in case the user choose login option
+                                // convert the array to string and sent it to server
+                                //
+                                outToServer.writeBytes(arrToStr(userDetails));
+                                // System.out.println(inFromServer.readLine().replaceAll("\\#\\$","\n"));
+                                String ggg = inFromServer.readLine();
+                                if(ggg.equals("true"))
+                                {
+                                    handleConnectedState(userDetails);
+                                }
                                 break;
 
                         }
 
                         break;
+                  // in case of successful registration (this come only from the server!!)
                   case "Registered":
                       JOptionPane.showMessageDialog(null,
                               "Please log in to your account",
@@ -76,27 +88,44 @@ public class Client {
         }
     }
 
-    private static String arrToStr(String[] list)
+    private static void handleConnectedState(HashMap<String, String> userDetails) {
+       for (String s : userDetails.keySet())
+       {
+           System.out.println(userDetails.get(s));
+       }
+    }
+
+    private static String arrToStr(HashMap<String, String> list)
     {
         String listString = "";
-        for (String s : list)
+
+        for(String x : list.keySet())
         {
-            listString += s + " ";
+            listString += x+":"+list.get(x)+ " ";
         }
         return listString+ "\n";
     }
 
 
-    private static String[] getRegDetail(String[] userDetails) {
+    private static HashMap<String ,String> getRegDetail(HashMap<String ,String> userDetails) {
 
         System.out.println("Please enter 1 for Committee or 2 for Tenant");
-        String seniority = null;
-        switch(scanner.nextLine())
+        String seniority = null, buildingNumber, apartmentNumber, fullName;
+
+        String type = scanner.nextLine();
+        System.out.println("Please enter your first Name");
+        userDetails.put("firstName", scanner.nextLine());
+        System.out.println("Please enter your last Name");
+        userDetails.put("lastName", scanner.nextLine());
+
+        switch(type)
         {
             case "1": // in case the choose is committee
+                userDetails.put("type", "Committee");
                 System.out.println("Please enter seniority years (Numbers Only)");
                 try {
                     seniority = Integer.parseInt(scanner.nextLine()) + ""; // try the input to int in order to validate
+                    userDetails.put("seniority", seniority);
                 }
                 catch (NumberFormatException e)
                 {
@@ -105,11 +134,10 @@ public class Client {
                 }
                 break;
 
-            case "2":
-
-                System.out.println("Please enter your Apartment Number");
-
-
+            case "2": // in case the choose is Tenant
+                userDetails.put("type", "Tenant");
+                System.out.println("Please enter num of rooms");
+                userDetails.put("monthlyPayment", Integer.parseInt(scanner.nextLine())+"");
                 break;
             default:
                 System.out.println("not a valid input");
@@ -117,14 +145,21 @@ public class Client {
         }
 
         System.out.println("Please enter your Building Number");
-        return null;
+        buildingNumber = scanner.nextLine();
+        userDetails.put("buildingNumber", buildingNumber);
+        System.out.println("Please enter your Apartment Number");
+        apartmentNumber = scanner.nextLine();
+        userDetails.put("apartmentNumber", apartmentNumber);
+        // Committee or tenant
+
+        return userDetails;
     }
 
 
 
-    private static String[] register() {
+    private static HashMap<String ,String> register() {
 
-        String[] res = new String[LOGINOPTSIZE];
+        HashMap<String ,String> res = new HashMap<>();
         JPanel regPanel = new JPanel();
         regPanel.setLayout(new GridLayout(0,1));
         JLabel userLabel = new JLabel("user name:");
@@ -154,10 +189,10 @@ public class Client {
 //                System.out.println(userName.getText() +" Your password is: " + new String(password));
                 if(password.equals(password2) && password.length()>0 )
                 {
-                    res[0] = "Register";
-                    res[1] = userName.getText();
-                    
-                    res[2] = Encoder.strEncoder(password,"SHA-256");
+                    res.put("Operation", "Register");
+                    res.put("userName", userName.getText());
+
+                    res.put("Password", Encoder.strEncoder(password,"SHA-256"));
                     return res;
                 }
                 else{
@@ -169,22 +204,21 @@ public class Client {
                 return res;
 
             case JOptionPane.CLOSED_OPTION: // on form close
-            case 1: // on Register click
-                res[0] = "Exit";
+                res.put("Operation", "Exit");
                 return res;
-
+            case 1: // on Cancel click
+               return loginOrRegister();
 
 
         }
 
 
-
       return null;
     }
 
-    private static String[] loginOrRegister() {
+    private static HashMap<String ,String> loginOrRegister() {
 
-        String[] res = new String[LOGINOPTSIZE];
+        HashMap<String ,String> res = new HashMap<>();
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new GridLayout(0,1));
         JPanel panel = new JPanel();
@@ -209,16 +243,16 @@ public class Client {
             case 0:
                 char[] password = pass.getPassword();
                 //System.out.println(userName.getText() +" Your password is: " + new String(password));
-                res[0] = "Login";
-                res[1] = userName.getText();
-                res[2] = Encoder.strEncoder(new String(pass.getPassword()),"SHA-256");
+                res.put("Operation", "Login");
+                res.put("userName", userName.getText());
+                res.put("Password", Encoder.strEncoder(new String(pass.getPassword()),"SHA-256"));
                 return res;
             case 1: // on click on Register
                 return register();
 
             case JOptionPane.CLOSED_OPTION: // on form close
             case 2: // on Cancel
-                res[0] = "Exit";
+                res.put("Operation", "Exit");
                return res;
         }
 

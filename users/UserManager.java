@@ -1,7 +1,8 @@
-package users;
+package House_Committee.users;
 
 
-import db.sqlHandler;
+import House_Committee.db.sqlHandler;
+
 import House_Committee.Committee;
 import House_Committee.Tenant;
 import House_Committee.Person;
@@ -19,7 +20,7 @@ public class UserManager {
     {
         if(person instanceof Committee)
         {
-           sqlHandler.insert_Committee(person);
+           sqlHandler.insert_user(person);
         }
         else if (person instanceof Tenant)
         {
