@@ -59,10 +59,14 @@ public class Client {
                                 //
                                 outToServer.writeBytes(arrToStr(userDetails));
                                 // System.out.println(inFromServer.readLine().replaceAll("\\#\\$","\n"));
-                                String ggg = inFromServer.readLine();
-                                if(ggg.equals("true"))
+                                String resp = inFromServer.readLine();
+                                if(resp.equals("true"))
                                 {
-                                    handleConnectedState(userDetails);
+                                    //getMenu();
+                                    userDetails.put("Operation", "Menu");
+                                    outToServer.writeBytes(arrToStr(userDetails));
+                                    System.out.println(inFromServer.readLine());
+                                    //handleConnectedState(userDetails);
                                 }
                                 break;
 
@@ -121,7 +125,7 @@ public class Client {
         switch(type)
         {
             case "1": // in case the choose is committee
-                userDetails.put("type", "Committee");
+                userDetails.put("role", "Committee");
                 System.out.println("Please enter seniority years (Numbers Only)");
                 try {
                     seniority = Integer.parseInt(scanner.nextLine()) + ""; // try the input to int in order to validate
@@ -135,7 +139,7 @@ public class Client {
                 break;
 
             case "2": // in case the choose is Tenant
-                userDetails.put("type", "Tenant");
+                userDetails.put("role", "Tenant");
                 System.out.println("Please enter num of rooms");
                 userDetails.put("monthlyPayment", Integer.parseInt(scanner.nextLine())+"");
                 break;

@@ -103,9 +103,9 @@ public class sqlHandler {
 
     public static void insert_user(Person person) {
 
-        String sqlInsert = "insert into "+DBNAME+".users (`userName`,`lastName`,`firstName`,`hashedPassword`,`registrationDate`,`lastLogin`,`buildingNumber`,`apartmentNumber`)" +
-                " values (?,?,?,?,?,?,?,?)";
-
+        String sqlInsert = "insert into "+DBNAME+".users (`userName`,`lastName`,`firstName`,`hashedPassword`,`registrationDate`,`lastLogin`,`buildingNumber`,`apartmentNumber`,`role`)" +
+                " values (?,?,?,?,?,?,?,?,?)";
+        System.out.println("person.getRole() "+person.getRole());
         try {
             PreparedStatement pst = connect.prepareStatement(sqlInsert);
             pst.setString(1, person.getUserName());
@@ -115,8 +115,8 @@ public class sqlHandler {
             pst.setTimestamp(5,  person.getRegistrationDate());
             pst.setTimestamp(6,  person.getLastLogin());
             pst.setString(7, person.getBuildingNumber());
-            pst.setString(8, person.getApartmentNumber() );
-
+            pst.setString(8, person.getApartmentNumber());
+            pst.setString(9, person.getRole());
             pst.execute();
 
 

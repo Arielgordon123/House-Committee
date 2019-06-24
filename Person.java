@@ -11,6 +11,7 @@ public class Person {
     private String hashedPassword;
     private Timestamp registrationDate;
     private Timestamp lastLogin;
+    private String role;
 
     public String getApartmentNumber() {
         return apartmentNumber;
@@ -22,7 +23,7 @@ public class Person {
 
     private String apartmentNumber;
     private String buildingNumber;
-    public Person(String firstName, String lastName, String userName, String hashedPassword, Timestamp lastLogin, Timestamp registrationDate,String apartmentNumber,String buildingNumber) {
+    public Person(String firstName, String lastName, String userName, String hashedPassword, Timestamp lastLogin, Timestamp registrationDate, String apartmentNumber, String buildingNumber, String role) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.userName = userName;
@@ -31,7 +32,7 @@ public class Person {
         this.lastLogin = lastLogin;
         this.buildingNumber = buildingNumber;
         this.apartmentNumber = apartmentNumber;
-
+        this.role = role;
     }
 
     public String getFirstName() {
@@ -66,4 +67,10 @@ public class Person {
     public Timestamp getLastLogin() {
         return lastLogin;
     }
+
+    public String getRole() {
+        return role;
+    }
+
+
 }

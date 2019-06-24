@@ -85,24 +85,25 @@ public class socketHandler extends Thread {
                                     new Timestamp(System.currentTimeMillis()),
                                     new Timestamp(System.currentTimeMillis()),
                                     details.get("apartmentNumber"),
-                                    details.get("buildingNumber")));
-                            if(details.get("type").equals("Committee"))
+                                    details.get("buildingNumber"),
+                                    details.get("role")));
+                            if(details.get("role").equals("Committee"))
                             {
                                 // add seniority to db
                                 sqlHandler.set_seniority(details.get("seniority"));
                                 committee = new Committee(details.get("firstName"),details.get("lastName"), details.get("userName"),
                                         details.get("Password"),details.get("seniority"), new Timestamp(System.currentTimeMillis()),
                                         new Timestamp(System.currentTimeMillis()),details.get("apartmentNumber"),
-                                        details.get("buildingNumber"));
+                                        details.get("buildingNumber"),details.get("role"));
                             }
-                            else if(details.get("type").equals("Tenant"))
+                            else if(details.get("role").equals("Tenant"))
                             {
                                 // add monthly payment to db
                                 sqlHandler.set_monthly_payment(Integer.parseInt(details.get("monthlyPayment")) * PAYMET_PER_ROOM+ "");
                                 tenant = new Tenant(details.get("firstName"),details.get("lastName"), details.get("userName"),
                                         details.get("Password"), new Timestamp(System.currentTimeMillis()),
                                         new Timestamp(System.currentTimeMillis()),details.get("apartmentNumber"),
-                                        details.get("buildingNumber"));
+                                        details.get("buildingNumber"),details.get("role"));
                                 tenant.setMonthlyPayment(Integer.parseInt(details.get("monthlyPayment")) * PAYMET_PER_ROOM);
                             }
 
@@ -110,8 +111,9 @@ public class socketHandler extends Thread {
 
                             break;
                         case "Menu":
-                            outToClient.writeBytes("welcome to the House Committee Program!");
-
+                            System.out.println("test");
+                            outToClient.writeBytes("welcome to the House Committee Program!\n");
+                            break;
                     }
                    // outToClient.writeBytes(sqlHandler.select_user(personFromClient)+"\n");
                    // outToClient.writeBytes(sqlHandler.select_query()+"\n");
