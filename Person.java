@@ -23,7 +23,7 @@ public class Person {
 
     private String apartmentNumber;
     private String buildingNumber;
-    public Person(String firstName, String lastName, String userName, String hashedPassword, Timestamp lastLogin, Timestamp registrationDate, String apartmentNumber, String buildingNumber, String role) {
+    public Person(String id,String firstName, String lastName, String userName, String hashedPassword, Timestamp lastLogin, Timestamp registrationDate, String apartmentNumber, String buildingNumber, String role) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.userName = userName;
@@ -33,6 +33,7 @@ public class Person {
         this.buildingNumber = buildingNumber;
         this.apartmentNumber = apartmentNumber;
         this.role = role;
+        this.id = id;
     }
 
     public String getFirstName() {
@@ -72,5 +73,19 @@ public class Person {
         return role;
     }
 
-
+    @Override
+    public String toString() {
+        return "Person{" +
+                "firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", id='" + id + '\'' +
+                ", userName='" + userName + '\'' +
+                ", hashedPassword='" + hashedPassword + '\'' +
+                ", registrationDate=" + registrationDate +
+                ", lastLogin=" + lastLogin +
+                ", role='" + role + '\'' +
+                ", apartmentNumber='" + apartmentNumber + '\'' +
+                ", buildingNumber='" + buildingNumber + '\'' +
+                '}';
+    }
 }

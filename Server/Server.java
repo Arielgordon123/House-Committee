@@ -7,6 +7,7 @@ import java.net.Socket;
 
 
 public class Server {
+    public static final String SPACIALLINEBREAK = "#$";
     public static final Object waitObject = Server.class;
     public static int connected = 0;
     public static void main(String argv[]) throws Exception

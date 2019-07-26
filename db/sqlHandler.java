@@ -1,5 +1,7 @@
 package House_Committee.db;
+import House_Committee.Committee;
 import House_Committee.Person;
+import House_Committee.Server.Server;
 import House_Committee.Tenant;
 
 import java.sql.*;
@@ -9,7 +11,8 @@ import java.util.HashMap;
 public class sqlHandler {
 
     private static Connection connect;
-    private static final String DBNAME = "heroku_e41c452f428bb7d";
+//    private static final String DBNAME = "heroku_e41c452f428bb7d";
+    private static final String DBNAME = "house_committee";
 
     public static void delete_statement(){
 
@@ -79,10 +82,10 @@ public class sqlHandler {
     }
 
 
-    public static boolean userLogin(String userName, String hashedPassword) {
-
+    public static Boolean[] userLogin(String userName, String hashedPassword) {
+        Boolean[] b= new Boolean[]{false,false};
         try {
-            String user = "select userName, hashedPassword from heroku_e41c452f428bb7d.users where userName = ?";
+            String user = "select userName, hashedPassword, role from "+DBNAME+".users where userName = ?";
             PreparedStatement statement = connect.prepareStatement(user);
             statement.setString(1, userName);
             ResultSet result = statement.executeQuery();
@@ -91,14 +94,23 @@ public class sqlHandler {
             {
                 System.out.println("hashedPassword " +result.getString("hashedPassword"));
                 if(result.getString("userName").equals(userName) && result.getString("hashedPassword").equals(hashedPassword))
-                    return true;
+                {
+                    if(result.getString("role").equals("Tenant")) {
+                        b[0] = true; // successful login
+                        b[1] = false; // is Committee
+                    }
+                    else if(result.getString("role").equals("Committee")) {
+                        b[0] = true; // successful login
+                        b[1] = true; // is Committee
+                    }
+                }
             }
 
 
         } catch (SQLException e) {
-            //  e.printStackTrace();
+              e.printStackTrace();
         }
-        return false;
+        return b;
     }
 
     public static void insert_user(Person person) {
@@ -165,7 +177,7 @@ public class sqlHandler {
                         table += (meta.getColumnName(column) + " | ");
                     }
                 }
-                table += "#$";
+                table += Server.SPACIALLINEBREAK;
 
                 i++;
                 for (int column = 1; column <= columnCount; ++column) {
@@ -177,10 +189,162 @@ public class sqlHandler {
             }
         return  table;
     }
-//    public static Person getTenantByUserName(String id, String buildingNumber)
-//    {
-//
-//    }
+    public static Person getTenantByUserName(String userName)
+    {
+
+        String query = "select  `idCommittee` as \"id\",`firstName`,  `lastName`,  `userName`,  `hashedPassword`, `lastLogin`,  `registrationDate`,`seniority`, `apartmentNumber`,`buildingNumber`,  `role` , \"\" as \"monthlyPayment\"\n" +
+                "from users\n" +
+                "join committees on  users.userId = committees.userId\n" +
+                "where userName = ? \n" +
+                "union\n" +
+                "select `idTenants`,`firstName`,  `lastName`,  `userName`,  `hashedPassword`, `lastLogin`,  `registrationDate`,''as \"seniority\", `apartmentNumber`,`buildingNumber`,  `role`, `monthlyPayment`\n" +
+                "from users\n" +
+                "join tenants on users.userId = tenants.userId\n" +
+                "where userName = ?";
+
+
+        try {
+            PreparedStatement statement = connect.prepareStatement(query);
+            statement.setString(1, userName);
+            statement.setString(2, userName);
+            ResultSet result = statement.executeQuery();
+
+            String type;
+            ResultSetMetaData meta = statement.getMetaData();
+            int columnCount = meta.getColumnCount();
+            int i=0;
+            while(result.next())
+            {
+                type = result.getString("role");
+                if(type.equals("Tenant"))
+                {
+                    Person tenant = new Tenant(
+                            result.getString("id"),
+                            result.getString("firstName"),
+                            result.getString("lastName"),
+                            result.getString("userName"),
+                            result.getString("hashedPassword"),
+                            result.getTimestamp("lastLogin"),
+                            result.getTimestamp("registrationDate"),
+                            result.getString("apartmentNumber"),
+                            result.getString("buildingNumber"),
+                            result.getString("role"),
+                            result.getDouble("monthlyPayment")
+                            );
+                    return tenant;
+                }
+                else if (type.equals("Committee"))
+                {
+                    Person committee = new Committee(
+                            result.getString("id"),
+                            result.getString("firstName"),
+                            result.getString("lastName"),
+                            result.getString("userName"),
+                            result.getString("hashedPassword"),
+                            result.getString("seniority"),
+                            result.getTimestamp("lastLogin"),
+                            result.getTimestamp("registrationDate"),
+                            result.getString("apartmentNumber"),
+                            result.getString("buildingNumber"),
+                            result.getString("role")
+                    );
+                    return committee;
+                }
+
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+
+        return null;
+    }
+    // 1
+    public static String getPaymentByTenantId(String id)
+    {
+        String query ="select paymentDate, paymentSum\n" +
+                "from payments\n" +
+                "where idTenants = ?\n" +
+                "order by paymentDate";
+        try {
+            PreparedStatement statement = connect.prepareStatement(query);
+            statement.setString(1, id);
+
+            return select_query(statement);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    // 2
+    public static String getAllPaymentsByBuilding(String buildingNumber) {
+
+        String query ="select *\n" +
+                "from (\n" +
+                "select paymentDate, paymentSum,users.apartmentNumber,concat(users.firstName,\" \", users.lastName) as \"name\", users.buildingNumber  -- tenants.idTenants as \"idTenants\"\n" +
+                "from payments\n" +
+                "join tenants on tenants.idTenants = payments.idTenants\n" +
+                "join users on users.userId = tenants.userId\n" +
+                ") as u\n" +
+                "where u.buildingNumber = ?";
+        try {
+            PreparedStatement statement = connect.prepareStatement(query);
+            statement.setString(1, buildingNumber);
+
+            return select_query(statement);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+    // 3
+    public static void setPaymentByTenantId(String idTenants, Double paymentSum,String paymentDate ) {
+
+        String query ="INSERT payments\n" +
+                "(`paymentSum`,\n" +
+                "`idTenants`,\n" +
+                "`paymentDate`)\n" +
+                "VALUES\n" +
+                "(?,\n" +
+                "?,\n" +
+                "?)";
+        try {
+            PreparedStatement statement = connect.prepareStatement(query);
+            statement.setDouble(1, paymentSum);
+            statement.setString(2,idTenants);
+            statement.setString(3,paymentDate);
+            statement.execute();
+        }
+        catch (SQLException e)
+        {
+            e.printStackTrace();
+        }
+    }
+    // 4
+    public static String getSumPaymentsByBuilding(String buildingNumber) {
+
+        String query ="select sum(paymentSum) as \"sum\", month(paymentDate) as \"month\"\n" +
+                "from (\n" +
+                "select paymentDate, paymentSum, tenants.idTenants as \"idTenants\", users.buildingNumber\n" +
+                "from payments\n" +
+                "join tenants on tenants.idTenants = payments.idTenants\n" +
+                "join users on users.userId = tenants.userId\n" +
+                ") as u\n" +
+                "where u.buildingNumber = ?\n" +
+                "group by month(u.paymentDate)";
+        try {
+            PreparedStatement statement = connect.prepareStatement(query);
+            statement.setString(1, buildingNumber);
+
+            return select_query(statement);
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
     public static String select_paymentByTenantId(String id, String buildingNumber)
     {
         String query = "select users.buildingNumber, users.apartmentNumber, payments.paymentSum, payments.paymentDate\n" +
@@ -228,9 +392,12 @@ public class sqlHandler {
     {
 
         connection();
-        String host = "jdbc:mysql://us-cdbr-iron-east-02.cleardb.net/heroku_e41c452f428bb7d?reconnect=true";
-        String username = "b74f0d4bebea4b";
-        String password = "ce29cedbe787040"; //
+//        String host = "jdbc:mysql://us-cdbr-iron-east-02.cleardb.net/heroku_e41c452f428bb7d?reconnect=true";
+//        String username = "b74f0d4bebea4b";
+//        String password = "ce29cedbe787040"; //
+        String host = "jdbc:mysql://127.0.0.1:3306/";
+        String username = "root";
+        String password = ""; //
 
         try {
             connect = DriverManager.getConnection(host, username, password);

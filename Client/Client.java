@@ -5,10 +5,7 @@ import House_Committee.Encoder;
 
 import javax.swing.*;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.DataOutputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectOutputStream;
+import java.io.*;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
@@ -18,59 +15,36 @@ import static House_Committee.Encoder.strEncoder;
 
 public class Client {
     static String[] options = new String[]{"Login","Register", "Cancel"};
+
     static final int LOGINOPTSIZE = 10;
+    static HashMap<String ,String> userDetails = new HashMap<>();
     static Scanner scanner = new Scanner(System.in);
+    private static void exit(BufferedReader inFromServer, DataOutputStream outToServer) throws IOException {
+        inFromServer.close(); // close all the connection
+        outToServer.close();
+        System.exit(1); // Exit from the process
+    }
     public static void main(String argv[]) throws Exception
     {
 
 //        strEncoder("123456","SHA-256");
 
-        String modifiedSentence;
+        String strFromServer;
         Socket clientSocket = new Socket("localhost", 10000); // server ip and port
         DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream()); // pipe for send data to the server
         BufferedReader   inFromServer= new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));// pipe for get data from the server
         try {
+            System.out.println(inFromServer.readLine()); // getting from server
 
             while (true) {
-
-                modifiedSentence = inFromServer.readLine(); // getting from server
-
-              switch (modifiedSentence) {
-                   // System.out.println(modifiedSentence.replaceAll("\\#\\$","\n"));// printing in the console
-                    case "Login":
-                        HashMap<String ,String> userDetails = loginOrRegister();
+                strFromServer = inFromServer.readLine();
+                System.out.println("modifiedSentence " + strFromServer);
+                switch (strFromServer) {
+                  case "Login":
+                        userDetails = loginOrRegister();
                         while(userDetails == null) // while user not connected
                             userDetails = loginOrRegister();
-                        switch (userDetails.get("Operation"))
-                        {
-                            case "Exit":
-                                // if the user close the form from the X or Cancel Button
-                                inFromServer.close(); // close all the connection
-                                outToServer.close();
-                                System.exit(1); // Exit from the process
-                                break;
-                            case "Register": // get more info from the user by the command line
-                                userDetails = getRegDetail(userDetails);
-                                // there is no break because we need to send userDetails to the server in both cases
 
-                            case "Login":
-                                // in case the user choose login option
-                                // convert the array to string and sent it to server
-                                //
-                                outToServer.writeBytes(arrToStr(userDetails));
-                                // System.out.println(inFromServer.readLine().replaceAll("\\#\\$","\n"));
-                                String resp = inFromServer.readLine();
-                                if(resp.equals("true"))
-                                {
-                                    //getMenu();
-                                    userDetails.put("Operation", "Menu");
-                                    outToServer.writeBytes(arrToStr(userDetails));
-                                    System.out.println(inFromServer.readLine());
-                                    //handleConnectedState(userDetails);
-                                }
-                                break;
-
-                        }
 
                         break;
                   // in case of successful registration (this come only from the server!!)
@@ -80,6 +54,38 @@ public class Client {
                               "Registered  Successfully ",
                               JOptionPane.OK_OPTION);
                       break;
+                  case "connected":
+                      String resp = inFromServer.readLine();
+                      if(resp.startsWith("true")) //&& userDetails.get("role").equals("Tenant")
+                      {
+                          getMainMenu(outToServer, inFromServer, resp);
+                      }
+                    break;
+                }
+                switch (userDetails.get("Operation"))
+                {
+                    case "Exit":
+                        // if the user close the form from the X or Cancel Button
+                        exit(inFromServer, outToServer);
+                        break;
+                    case "Register": // get more info from the user by the command line
+                        userDetails = getRegDetail(userDetails);
+                        // there is no break because we need to send userDetails to the server in both cases
+
+                    case "Login":
+                        // in case the user choose login option
+                        // convert the array to string and sent it to server
+                        //
+                        outToServer.writeBytes(arrToStr(userDetails));
+                        // System.out.println(inFromServer.readLine().replaceAll("\\#\\$","\n"));
+                        String resp = inFromServer.readLine();
+                        System.out.println("response from server " + resp);
+                        if(resp.startsWith("true")) //&& userDetails.get("role").equals("Tenant")
+                        {
+                            getMainMenu(outToServer, inFromServer, resp);
+                        }
+                        break;
+
                 }
 
             }
@@ -89,6 +95,71 @@ public class Client {
         {
 
 
+        }
+    }
+
+    private static void getMainMenu(DataOutputStream outToServer, BufferedReader inFromServer, String resp) {
+        try {
+        userDetails.put("Operation", "Menu");
+
+        outToServer.writeBytes(arrToStr(userDetails)); // send to server the menu request
+
+        System.out.println(inFromServer.readLine().replaceAll("\\#\\$", "\n")); // read welcome message
+        String modifiedSentence = scanner.nextLine();
+        //System.out.println(inFromServer.readLine()); // get available oprations
+        if(resp.split(" ")[1].equals("false")) { // if the user is Tenant
+
+
+            if (modifiedSentence.equals("1")) { // validate user choice
+                outToServer.writeBytes("1\n");
+                System.out.println(inFromServer.readLine().replaceAll("\\#\\$", "\n"));
+
+            } else if (modifiedSentence.toLowerCase().equals("logout")) {
+                System.out.println("BYE");
+                exit(inFromServer, outToServer);
+                //outToServer.writeBytes(arrToStr(userDetails));
+            }
+
+        }
+        else // if the user is committee
+        {
+            switch (modifiedSentence)
+            {
+                case "1":
+                    System.out.println("Please enter Tenant Id: ");
+                    modifiedSentence = scanner.nextLine();
+                    outToServer.writeBytes("choice:1 idTenant:"+modifiedSentence+"\n");
+
+                    break;
+                case "2":
+                    outToServer.writeBytes("choice:2\n");
+                    break;
+                case "3":
+                    System.out.println("Please enter Tenant Id: ");
+                    modifiedSentence = scanner.nextLine();
+                    outToServer.writeBytes("choice:3 idTenant:"+modifiedSentence);
+                    System.out.println("Please enter payment Sum: ");
+                    modifiedSentence = scanner.nextLine();
+                    outToServer.writeBytes(" paymentSum:"+modifiedSentence);
+                    System.out.println("Please enter payment Date: (yyyy-MM-dd) ");
+                    modifiedSentence = scanner.nextLine();
+                    outToServer.writeBytes(" paymentDate:"+modifiedSentence+"\n");
+                    break;
+                case "4":
+                    outToServer.writeBytes("choice:4\n");
+                    break;
+
+                default:
+                    System.out.println("not a valid Choice");
+                    break;
+
+            }
+            System.out.println(inFromServer.readLine().replaceAll("\\#\\$", "\n"));
+        }
+
+        //handleConnectedState(userDetails);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

@@ -10,10 +10,12 @@ public class Tenant extends Person {
     private double monthlyPayment;
     private ArrayList<HashMap<String ,String>> paymentsArr;
 
-    public Tenant(String firstName, String lastName, String userName, String hashedPassword, Timestamp lastLogin, Timestamp registrationDate,String apartmentNumber,String buildingNumber, String role) {
+    public Tenant(String id,String firstName, String lastName, String userName, String hashedPassword,
+                  Timestamp lastLogin, Timestamp registrationDate,String apartmentNumber,
+                  String buildingNumber, String role,double monthlyPayment ) {
         // call to main Person Object Constractor
-        super(firstName, lastName, userName, hashedPassword,lastLogin,registrationDate,apartmentNumber,buildingNumber, role);
-
+        super(id,firstName, lastName, userName, hashedPassword,lastLogin,registrationDate,apartmentNumber,buildingNumber, role);
+        this.monthlyPayment = monthlyPayment;
     }
 
     public void setMonthlyPayment(double monthlyPayment) {
@@ -23,5 +25,14 @@ public class Tenant extends Person {
     public int getAllPayment() {
 
         return 0;
+    }
+
+
+    @Override
+    public String toString() {
+        return super.toString()+ " Tenant{" +
+                "monthlyPayment=" + monthlyPayment +
+                ", paymentsArr=" + paymentsArr +
+                '}';
     }
 }

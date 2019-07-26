@@ -7,9 +7,10 @@ public class Committee extends Person{
 
     private String seniority;
 
-    public Committee(String firstName, String lastName, String userName, String hashedPassword,
-                     String seniority, Timestamp lastLogin, Timestamp registrationDate,String apartmentNumber,String buildingNumber, String role) {
-        super(firstName, lastName, userName, hashedPassword,lastLogin,registrationDate,apartmentNumber,buildingNumber,role );
+    public Committee(String id,String firstName, String lastName, String userName, String hashedPassword,
+                     String seniority, Timestamp lastLogin, Timestamp registrationDate,String apartmentNumber,
+                     String buildingNumber, String role) {
+        super(id,firstName, lastName, userName, hashedPassword,lastLogin,registrationDate,apartmentNumber,buildingNumber,role );
         this.seniority = seniority;
 
     }
@@ -29,5 +30,12 @@ public class Committee extends Person{
     public void setPayments()
     {
 
+    }
+
+    @Override
+    public String toString() {
+        return super.toString()+ " Committee{" +
+                "seniority='" + seniority + '\'' +
+                '}';
     }
 }
