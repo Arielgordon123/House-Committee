@@ -44,8 +44,6 @@ public class Client {
                         userDetails = loginOrRegister();
                         while(userDetails == null) // while user not connected
                             userDetails = loginOrRegister();
-
-
                         break;
                   // in case of successful registration (this come only from the server!!)
                   case "Registered":
@@ -103,8 +101,10 @@ public class Client {
         userDetails.put("Operation", "Menu");
 
         outToServer.writeBytes(arrToStr(userDetails)); // send to server the menu request
-
+        System.out.println(inFromServer.readLine());
+        System.out.println(inFromServer.readLine());
         System.out.println(inFromServer.readLine().replaceAll("\\#\\$", "\n")); // read welcome message
+
         String modifiedSentence = scanner.nextLine();
         //System.out.println(inFromServer.readLine()); // get available oprations
         if(resp.split(" ")[1].equals("false")) { // if the user is Tenant

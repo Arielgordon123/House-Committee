@@ -79,6 +79,10 @@ public class socketHandler extends Thread {
                             System.out.println("Login");
                             isLoggedIn = sqlHandler.userLogin(details.get("userName"),details.get("Password"));
                             outToClient.writeBytes(isLoggedIn[0] +" "+isLoggedIn[1]+"\n");
+                            if(isLoggedIn[0])
+                                outToClient.writeBytes("connected\n");
+                            else
+                                outToClient.writeBytes("Login\n");
                             break;
                         case "Register":
                             System.out.println("register");
