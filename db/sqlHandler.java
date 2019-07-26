@@ -192,14 +192,14 @@ public class sqlHandler {
     public static Person getTenantByUserName(String userName)
     {
 
-        String query = "select  `idCommittee` as \"id\",`firstName`,  `lastName`,  `userName`,  `hashedPassword`, `lastLogin`,  `registrationDate`,`seniority`, `apartmentNumber`,`buildingNumber`,  `role` , \"\" as \"monthlyPayment\"\n" +
-                "from users\n" +
-                "join committees on  users.userId = committees.userId\n" +
+        String query = "select `idCommittee` as \"id\",`firstName`,  `lastName`,  `userName`,  `hashedPassword`, `lastLogin`,  `registrationDate`,`seniority`, `apartmentNumber`,`buildingNumber`,  `role` , \"\" as \"monthlyPayment\"\n" +
+                "from "+DBNAME+".users\n" +
+                "join "+DBNAME+".committees on  users.userId = committees.userId\n" +
                 "where userName = ? \n" +
                 "union\n" +
                 "select `idTenants`,`firstName`,  `lastName`,  `userName`,  `hashedPassword`, `lastLogin`,  `registrationDate`,''as \"seniority\", `apartmentNumber`,`buildingNumber`,  `role`, `monthlyPayment`\n" +
-                "from users\n" +
-                "join tenants on users.userId = tenants.userId\n" +
+                "from "+DBNAME+".users\n" +
+                "join "+DBNAME+".tenants on users.userId = tenants.userId\n" +
                 "where userName = ?";
 
 
@@ -263,7 +263,7 @@ public class sqlHandler {
     public static String getPaymentByTenantId(String id)
     {
         String query ="select paymentDate, paymentSum\n" +
-                "from payments\n" +
+                "from "+DBNAME+".payments\n" +
                 "where idTenants = ?\n" +
                 "order by paymentDate";
         try {
@@ -283,9 +283,9 @@ public class sqlHandler {
         String query ="select *\n" +
                 "from (\n" +
                 "select paymentDate, paymentSum,users.apartmentNumber,concat(users.firstName,\" \", users.lastName) as \"name\", users.buildingNumber  -- tenants.idTenants as \"idTenants\"\n" +
-                "from payments\n" +
-                "join tenants on tenants.idTenants = payments.idTenants\n" +
-                "join users on users.userId = tenants.userId\n" +
+                "from "+DBNAME+".payments\n" +
+                "join "+DBNAME+".tenants on tenants.idTenants = payments.idTenants\n" +
+                "join "+DBNAME+".users on users.userId = tenants.userId\n" +
                 ") as u\n" +
                 "where u.buildingNumber = ?";
         try {
@@ -302,7 +302,7 @@ public class sqlHandler {
     // 3
     public static void setPaymentByTenantId(String idTenants, Double paymentSum,String paymentDate ) {
 
-        String query ="INSERT payments\n" +
+        String query ="INSERT "+DBNAME+".payments\n" +
                 "(`paymentSum`,\n" +
                 "`idTenants`,\n" +
                 "`paymentDate`)\n" +
@@ -328,9 +328,9 @@ public class sqlHandler {
         String query ="select sum(paymentSum) as \"sum\", month(paymentDate) as \"month\"\n" +
                 "from (\n" +
                 "select paymentDate, paymentSum, tenants.idTenants as \"idTenants\", users.buildingNumber\n" +
-                "from payments\n" +
-                "join tenants on tenants.idTenants = payments.idTenants\n" +
-                "join users on users.userId = tenants.userId\n" +
+                "from "+DBNAME+".payments\n" +
+                "join "+DBNAME+".tenants on tenants.idTenants = payments.idTenants\n" +
+                "join "+DBNAME+".users on users.userId = tenants.userId\n" +
                 ") as u\n" +
                 "where u.buildingNumber = ?\n" +
                 "group by month(u.paymentDate)";
@@ -348,9 +348,9 @@ public class sqlHandler {
     public static String select_paymentByTenantId(String id, String buildingNumber)
     {
         String query = "select users.buildingNumber, users.apartmentNumber, payments.paymentSum, payments.paymentDate\n" +
-                "from users\n" +
-                "join tenants on tenants.userId = users.userId\n" +
-                "join payments on tenants.idTenants = payments.idTenants\n" +
+                "from "+DBNAME+".users\n" +
+                "join "+DBNAME+".tenants on tenants.userId = users.userId\n" +
+                "join "+DBNAME+".payments on tenants.idTenants = payments.idTenants\n" +
                 "where payments.idTenants = ? and users.buildingNumber = ?";
         try {
             PreparedStatement statement = connect.prepareStatement(query);
