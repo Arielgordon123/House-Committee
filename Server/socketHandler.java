@@ -120,6 +120,8 @@ public class socketHandler extends Thread {
                             }
 
                             outToClient.writeBytes("Registered\n");
+                            outToClient.writeBytes("Registered\n");
+                            outToClient.writeBytes("Login\n");
 
                             break;
                         case "Menu":
