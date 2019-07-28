@@ -83,6 +83,7 @@ public class socketHandler extends Thread {
                                 outToClient.writeBytes("connected\n");
                             else
                                 outToClient.writeBytes("Login\n");
+                                outToClient.writeBytes("Login\n");
                             break;
                         case "Register":
                             System.out.println("register");
@@ -133,7 +134,6 @@ public class socketHandler extends Thread {
                                 System.out.println(fromClient);
                                 if(fromClient.equals("1"))
                                 {
-                                    System.out.println("1");
                                     outToClient.writeBytes(sqlHandler.getPaymentByTenantId(person.getId()) + "\n");
                                 }
 
@@ -141,7 +141,7 @@ public class socketHandler extends Thread {
                             else if (person instanceof Committee)
                             {
                                 outToClient.writeBytes("Welcome "+person.getFirstName() +Server.SPACIALLINEBREAK);
-                                outToClient.writeBytes( "Please enter 1 in order to get payment history By tenant Id " );
+                                outToClient.writeBytes( "Please enter 1 in order to get payment history By tenant Id "+Server.SPACIALLINEBREAK );
                                 outToClient.writeBytes( "Please enter 2 in order to get all payment for your building"+Server.SPACIALLINEBREAK);
                                 outToClient.writeBytes( "Please enter 3 in order to insert Payment by Tenant Id "+Server.SPACIALLINEBREAK);
                                 outToClient.writeBytes( "Please enter 4 in order to get all payment for your building summarised by month"+Server.SPACIALLINEBREAK);

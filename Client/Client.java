@@ -38,7 +38,7 @@ public class Client {
 
             while (true) {
                 strFromServer = inFromServer.readLine();
-                System.out.println("modifiedSentence " + strFromServer);
+                //System.out.println("modifiedSentence " + strFromServer);
                 switch (strFromServer) {
                   case "Login":
                         userDetails = loginOrRegister();
@@ -58,7 +58,12 @@ public class Client {
                       {
                           getMainMenu(outToServer, inFromServer, resp);
                       }
-                    break;
+                      break;
+                  case "true true":
+                  case "true false":
+                      getMainMenu(outToServer, inFromServer, strFromServer);
+                      break;
+
                 }
                 switch (userDetails.get("Operation"))
                 {
@@ -77,11 +82,17 @@ public class Client {
                         outToServer.writeBytes(arrToStr(userDetails));
                         // System.out.println(inFromServer.readLine().replaceAll("\\#\\$","\n"));
                         String resp = inFromServer.readLine();
+                        System.out.println(inFromServer.readLine());
+                        System.out.println(inFromServer.readLine());
+
                         System.out.println("response from server " + resp);
                         if(resp.startsWith("true")) //&& userDetails.get("role").equals("Tenant")
                         {
                             getMainMenu(outToServer, inFromServer, resp);
                         }
+                        else
+                            userDetails = null;
+
                         break;
 
                 }
@@ -98,12 +109,14 @@ public class Client {
 
     private static void getMainMenu(DataOutputStream outToServer, BufferedReader inFromServer, String resp) {
         try {
+            String response;
         userDetails.put("Operation", "Menu");
 
         outToServer.writeBytes(arrToStr(userDetails)); // send to server the menu request
-        System.out.println(inFromServer.readLine());
-        System.out.println(inFromServer.readLine());
-        System.out.println(inFromServer.readLine().replaceAll("\\#\\$", "\n")); // read welcome message
+        response = inFromServer.readLine().replaceAll("\\#\\$", "\n");
+        while(!response.startsWith("welcome"))
+            response =inFromServer.readLine().replaceAll("\\#\\$", "\n");
+        System.out.println(response); // read welcome message
 
         String modifiedSentence = scanner.nextLine();
         //System.out.println(inFromServer.readLine()); // get available oprations
