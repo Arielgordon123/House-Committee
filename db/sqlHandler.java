@@ -85,7 +85,7 @@ public class sqlHandler {
     public static Boolean[] userLogin(String userName, String hashedPassword) {
         Boolean[] b= new Boolean[]{false,false};
         try {
-            String user = "select userName, hashedPassword, role from "+DBNAME+".users where userName = ?";
+            String user = "select userId, userName, hashedPassword, role from "+DBNAME+".users where userName = ?";
             PreparedStatement statement = connect.prepareStatement(user);
             statement.setString(1, userName);
             ResultSet result = statement.executeQuery();
@@ -93,8 +93,12 @@ public class sqlHandler {
             if (result.next())
             {
                 System.out.println("hashedPassword " +result.getString("hashedPassword"));
-                if(result.getString("userName").equals(userName) && result.getString("hashedPassword").equals(hashedPassword))
+                if(result.getString("userName").equals(userName) &&
+                        result.getString("hashedPassword").equals(hashedPassword))
                 {
+                    statement = connect.prepareStatement("UPDATE "+DBNAME+".users SET lastLogin =?  WHERE userId = "+result.getString("userId"));
+                    statement.setTimestamp(1,new Timestamp(System.currentTimeMillis()));
+                    statement.execute();
                     if(result.getString("role").equals("Tenant")) {
                         b[0] = true; // successful login
                         b[1] = false; // is Committee
@@ -139,7 +143,27 @@ public class sqlHandler {
         }
 
     }
+    public static void ChangePassword(String userName, String oldPassword,String newPass) throws Exception {
 
+        try {
+            if(userLogin(userName, oldPassword)[0]) // check if old password is correct
+            {
+                String query = "UPDATE "+DBNAME+".users SET hashedPassword =? WHERE userName = ?";
+                PreparedStatement statement = connect.prepareStatement(query);
+                statement.setString(1,newPass);
+                statement.setString(2,userName);
+                statement.execute();
+            }
+            else
+            {
+                throw new Exception("wrong username or password");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+    }
     public static void set_monthly_payment(String monthlyPayment) {
         String query = "insert into "+DBNAME+".tenants (`userId`, `monthlyPayment`)"+
                 " values(LAST_INSERT_ID(), ?)";
@@ -412,39 +436,6 @@ public class sqlHandler {
     }
 
 
-//    public static void main(String[] argv)
-//    {
-//        Scanner input = new Scanner(System.in);
-//        ConectingToSQL();
-//        select_query();
-
-       // select_user("test");
-//        for(int i=0 ; i < 1 ; i++)
-//        {
-//            System.out.println("enter idhr");
-//            String idhr = input.nextLine();
-//            System.out.println("enter name");
-//            String hr_name = input.nextLine();
-//            System.out.println("enter phone");
-//            String hr_phone = input.nextLine();
-//            System.out.println("enter age");
-//            String hr_age = input.nextLine();
-//            System.out.println("enter adress");
-//            String hr_adress = input.nextLine();
-//            System.out.println("enter mail");
-//            String hr_mail = input.nextLine();
-//
-//            insert_statement(idhr, hr_name, hr_phone,hr_age,hr_adress, hr_mail );
-//
-//
-//        }
-
-
-        //select_query();
-        //	update_statement();
-        //	delete_statement();
-        //	select_query();
-  //  }
 
 
 }

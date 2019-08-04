@@ -126,8 +126,9 @@ public class socketHandler extends Thread {
                             break;
                         case "Menu":
 
-                            outToClient.writeBytes("welcome to the House Committee Program!"+Server.SPACIALLINEBREAK);
                             person = sqlHandler.getTenantByUserName(details.get("userName"));
+                            outToClient.writeBytes("Hi "+person.getFirstName()+"!"+Server.SPACIALLINEBREAK+"Welcome to the House Committee Program!"+Server.SPACIALLINEBREAK);
+                            outToClient.writeBytes("Please enter 0 if you want to Change your Password"+Server.SPACIALLINEBREAK);
                             if(person instanceof Tenant)
                             {
 //                                outToClient.writeBytes(person+"\n");
@@ -138,11 +139,15 @@ public class socketHandler extends Thread {
                                 {
                                     outToClient.writeBytes(sqlHandler.getPaymentByTenantId(person.getId()) + "\n");
                                 }
+                                else if(fromClient.startsWith("0")) {
+                                    outToClient.writeBytes(changePassword(clientArr,fromClient,details,person)+"\n");
+                                }
+
 
                             }
                             else if (person instanceof Committee)
                             {
-                                outToClient.writeBytes("Welcome "+person.getFirstName() +Server.SPACIALLINEBREAK);
+                               // outToClient.writeBytes("Welcome "+person.getFirstName() +Server.SPACIALLINEBREAK);
                                 outToClient.writeBytes( "Please enter 1 in order to get payment history By tenant Id "+Server.SPACIALLINEBREAK );
                                 outToClient.writeBytes( "Please enter 2 in order to get all payment for your building"+Server.SPACIALLINEBREAK);
                                 outToClient.writeBytes( "Please enter 3 in order to insert Payment by Tenant Id "+Server.SPACIALLINEBREAK);
@@ -152,6 +157,8 @@ public class socketHandler extends Thread {
                                 details = stringToHashMap(fromClient.split(" "),details);
                                 switch (details.get("choice"))
                                 {
+                                    case "0":
+                                        outToClient.writeBytes(changePassword(clientArr,fromClient,details,person)+"\n");
                                     case "1":
                                         outToClient.writeBytes("Sum of Payments to Tenant id: "+details.get("idTenant")+Server.SPACIALLINEBREAK);
                                         outToClient.writeBytes(sqlHandler.getPaymentByTenantId(details.get("idTenant")) + "\n");
@@ -201,6 +208,21 @@ public class socketHandler extends Thread {
         catch (IOException e) {
 
             e.printStackTrace();
+        }
+
+    }
+
+    private String changePassword(String[] clientArr, String fromClient, HashMap<String, String> details, Person person) {
+        try {
+            clientArr = fromClient.split(" ");
+            details = stringToHashMap(clientArr, details);
+            sqlHandler.ChangePassword(person.getUserName(), details.get("oldPassword"), details.get("newPassword"));
+            return "Password was changed successfully";
+        }
+        catch (Exception e)
+        {
+            System.out.println(e.getMessage());
+            return e.getMessage();
         }
 
     }

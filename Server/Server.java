@@ -20,7 +20,7 @@ public class Server {
             sqlHandler.ConectingToSQL();
             System.out.println("Server is on, Port is: "+ port);
         } catch(IOException e) {
-            System.out.println(e);
+            e.printStackTrace();
             System.exit(1);
         }
         while (true) {
