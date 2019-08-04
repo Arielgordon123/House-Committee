@@ -1,6 +1,5 @@
 package House_Committee.Client;
 
-
 import House_Committee.Encoder;
 
 import javax.swing.*;
@@ -85,7 +84,7 @@ public class Client {
                         System.out.println(inFromServer.readLine());
                         System.out.println(inFromServer.readLine());
 
-                        System.out.println("response from server " + resp);
+                        // System.out.println("response from server " + resp);
                         if (resp.startsWith("true")) //&& userDetails.get("role").equals("Tenant")
                         {
                             getMainMenu(outToServer, inFromServer, resp);

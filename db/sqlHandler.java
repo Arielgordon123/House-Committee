@@ -14,74 +14,6 @@ public class sqlHandler {
 //    private static final String DBNAME = "heroku_e41c452f428bb7d";
     private static final String DBNAME = "house_committee";
 
-    public static void delete_statement(){
-
-        String sqldelete = "delete from student where h between ? and ? and name = ?";
-
-        try {
-            PreparedStatement pst = connect.prepareStatement(sqldelete);
-
-            pst.setString(1, "180");
-            pst.setString(2, "190");
-            pst.setString(3, "effi");
-
-            pst.execute();
-
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-    }
-
-    public static void update_statement(String name){
-
-        String sqlupdate = "UPDATE student SET name=?  WHERE id =? ";
-
-        try {
-            PreparedStatement pst = connect.prepareStatement(sqlupdate);
-
-            pst.setString(1, name);
-            pst.setString(2, "3344");
-            //	pst.setString(3, "66127762");
-
-            pst.executeUpdate();
-
-
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-    }
-
-    public static void insert_statement(String s1 , String s2,String s3,String s4,String s5,String s6 ){
-
-        String sqlInsert = "insert into test_inc.student (idhr,hr_name,hr_phone,hr_age,hr_address,hr_mail) values (?,?,?,?,?,?)";
-
-        try {
-            PreparedStatement pst = connect.prepareStatement(sqlInsert);
-            pst.setString(1, s1);
-            pst.setString(2, s2);
-            pst.setString(3, s3);
-            pst.setString(4, s4);
-            pst.setString(5, s5);
-            pst.setString(6, s6);
-
-
-            pst.execute();
-
-
-
-        } catch (SQLException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-
-    }
-
-
     public static Boolean[] userLogin(String userName, String hashedPassword) {
         Boolean[] b= new Boolean[]{false,false};
         try {
@@ -369,24 +301,7 @@ public class sqlHandler {
         }
         return null;
     }
-    public static String select_paymentByTenantId(String id, String buildingNumber)
-    {
-        String query = "select users.buildingNumber, users.apartmentNumber, payments.paymentSum, payments.paymentDate\n" +
-                "from "+DBNAME+".users\n" +
-                "join "+DBNAME+".tenants on tenants.userId = users.userId\n" +
-                "join "+DBNAME+".payments on tenants.idTenants = payments.idTenants\n" +
-                "where payments.idTenants = ? and users.buildingNumber = ?";
-        try {
-            PreparedStatement statement = connect.prepareStatement(query);
-            statement.setString(1, id);
-            statement.setString(2, buildingNumber);
-            return select_query(statement);
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return null;
-    }
     private static String select_query(PreparedStatement statement) {
 
         try {
